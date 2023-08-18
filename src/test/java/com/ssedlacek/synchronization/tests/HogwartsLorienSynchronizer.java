@@ -1,4 +1,8 @@
-package com.ssedlacek.synchronization;
+package com.ssedlacek.synchronization.tests;
+
+import com.ssedlacek.synchronization.GetterNotFoundException;
+import com.ssedlacek.synchronization.SetterNotFoundException;
+import com.ssedlacek.synchronization.SynchronizationBase;
 
 import java.lang.reflect.InvocationTargetException;
 

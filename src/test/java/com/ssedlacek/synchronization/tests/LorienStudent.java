@@ -1,4 +1,4 @@
-package com.ssedlacek.synchronization;
+package com.ssedlacek.synchronization.tests;
 
 import lombok.Builder;
 import lombok.Getter;

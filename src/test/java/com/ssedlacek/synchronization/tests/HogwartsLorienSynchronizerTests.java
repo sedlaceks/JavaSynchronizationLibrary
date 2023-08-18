@@ -1,5 +1,7 @@
-package com.ssedlacek.synchronization;
+package com.ssedlacek.synchronization.tests;
 
+import com.ssedlacek.synchronization.GetterNotFoundException;
+import com.ssedlacek.synchronization.SetterNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

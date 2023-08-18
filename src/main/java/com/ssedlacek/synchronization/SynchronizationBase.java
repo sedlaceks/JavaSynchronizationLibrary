@@ -111,8 +111,26 @@ public abstract class SynchronizationBase<TPrimary, TSecondary, TMapping extends
 
         var transformed = transformMethod.apply(primarySystemFieldGetterValue);
 
-        if ((secValue == null) || (!secValue.equals(transformed))) {
-            hasChanged = true;
+        switch (item.overwritePolicy()) {
+            case Always -> {
+                secondarySystemFieldSetter.invoke(second, transformed);
+
+                hasChanged = true;
+            }
+            case IfNull -> {
+                if (secValue == null) {
+                    secondarySystemFieldSetter.invoke(second, transformed);
+
+                    hasChanged = true;
+                }
+            }
+            case IfNotNull -> {
+                if (secValue != null) {
+                    secondarySystemFieldSetter.invoke(second, transformed);
+
+                    hasChanged = true;
+                }
+            }
         }
 
         secondarySystemFieldSetter.invoke(second, transformed);

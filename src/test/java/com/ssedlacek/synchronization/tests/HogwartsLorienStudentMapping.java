@@ -1,8 +1,6 @@
-package com.ssedlacek.synchronization;
+package com.ssedlacek.synchronization.tests;
 
 import com.ssedlacek.synchronization.*;
-
-import java.util.List;
 
 public class HogwartsLorienStudentMapping extends Mapping {
     @Override
