@@ -44,11 +44,20 @@ public abstract class SynchronizationBase<TPrimary, TSecondary, TMapping extends
     }
 
 
+    private final SynchronizationSettings settings;
+
+
     public SynchronizationBase(Class<TPrimary> primaryClass, Class<TSecondary> secondaryClass, Class<TMapping> mapping)
             throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         this.primaryClass = primaryClass;
         this.secondaryClass = secondaryClass;
         this.mapping = mapping.getDeclaredConstructor().newInstance();
+        settings = setSynchronizationSettings();
+    }
+
+
+    protected SynchronizationSettings setSynchronizationSettings() {
+        return new SynchronizationSettings();
     }
 
 
@@ -85,28 +94,28 @@ public abstract class SynchronizationBase<TPrimary, TSecondary, TMapping extends
     private boolean updateFirstBySecond(Object first, Object second, MappingItem item, Function<Object, Object> transformMethod) throws GetterNotFoundException, SetterNotFoundException, InvocationTargetException, IllegalAccessException {
         var hasChanged = false;
 
-        var primarySystemFieldGetter = Arrays.stream(getPrimaryClassMethods()).filter(m ->
-                        m.getName().equals("get" + StringUtils.capitalize(item.getPrimarySystemNameField())))
+        final var primarySystemFieldGetter = Arrays.stream(getPrimaryClassMethods()).filter(m ->
+                        m.getName().equals(settings.getGetterPrefix() + StringUtils.capitalize(item.getPrimarySystemNameField())))
                 .findFirst()
                 .orElseThrow(() -> new GetterNotFoundException("No getter found in primary object for property with name " + item.getPrimarySystemNameField()));
 
-        var primarySystemFieldGetterValue = primarySystemFieldGetter.invoke(first);
+        final var primarySystemFieldGetterValue = primarySystemFieldGetter.invoke(first);
 
         // Obtain current value first.
-        var secondarySystemFieldGetter = Arrays.stream(getSecondaryClassMethods()).filter(d ->
-                        d.getName().equals("get" + StringUtils.capitalize(item.getSecondarySystemNameField())))
+        final var secondarySystemFieldGetter = Arrays.stream(getSecondaryClassMethods()).filter(d ->
+                        d.getName().equals(settings.getGetterPrefix() + StringUtils.capitalize(item.getSecondarySystemNameField())))
                 .findFirst()
                 .orElseThrow(() -> new GetterNotFoundException("No getter found in class for property with name " + item.getSecondarySystemNameField()));
 
         // Prepare setter.
-        var secondarySystemFieldSetter = Arrays.stream(getSecondaryClassMethods()).filter(c ->
-                        c.getName().equals("set" + StringUtils.capitalize(item.getSecondarySystemNameField())))
+        final var secondarySystemFieldSetter = Arrays.stream(getSecondaryClassMethods()).filter(c ->
+                        c.getName().equals(settings.getSetterPrefix() + StringUtils.capitalize(item.getSecondarySystemNameField())))
                 .findFirst()
                 .orElseThrow(() -> new SetterNotFoundException("No setter found in secondary object for property with name " + item.getSecondarySystemNameField()));
 
-        var secValue = secondarySystemFieldGetter.invoke(second);
+        final var secValue = secondarySystemFieldGetter.invoke(second);
 
-        var transformed = transformMethod.apply(primarySystemFieldGetterValue);
+        final var transformed = transformMethod.apply(primarySystemFieldGetterValue);
 
         switch (item.getOverwritePolicy()) {
             case Always:
@@ -114,8 +123,8 @@ public abstract class SynchronizationBase<TPrimary, TSecondary, TMapping extends
 
                 hasChanged = true;
 
-                break;
-        case IfNull:
+            break;
+            case IfNull:
                 if (secValue == null) {
                     secondarySystemFieldSetter.invoke(second, transformed);
 
@@ -128,9 +137,8 @@ public abstract class SynchronizationBase<TPrimary, TSecondary, TMapping extends
 
                     hasChanged = true;
                 }
+            break;
         }
-
-        secondarySystemFieldSetter.invoke(second, transformed);
 
         return hasChanged;
     }

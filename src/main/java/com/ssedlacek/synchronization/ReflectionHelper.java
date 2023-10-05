@@ -13,7 +13,7 @@ public class ReflectionHelper {
             return classMethods.get(clazz.getName());
         }
 
-        var methods = clazz.getMethods();
+        final var methods = clazz.getMethods();
 
         classMethods.put(clazz.getName(), methods);
 

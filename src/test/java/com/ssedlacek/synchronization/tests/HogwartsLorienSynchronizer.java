@@ -20,7 +20,7 @@ public class HogwartsLorienSynchronizer extends SynchronizationBase<HogwartsStud
     @Override
     protected Object transformToSecondary(Object value, String primaryFieldName, LorienStudent second, HogwartsStudent first) {
         if (value == null) {
-            return super.transformToSecondary(value, primaryFieldName, second, first);
+            return super.transformToSecondary(null, primaryFieldName, second, first);
         }
         if (value.getClass() == HogwartsHouse.class) {
             return new LorienTree(((HogwartsHouse)value).getName());

@@ -27,14 +27,14 @@ public final class HogwartsLorienSynchronizerTests {
         var lorienStudent = LorienStudent.builder()
                 .withLorienId(0)
                 .withFirstName("Legolas")
-                .withLastName("From Woods")
+                .withLastName(null) /* Demonstration purpose.*/
                 .build();
 
         synchronizer.fakeSynchronize(hogwartsStudent, lorienStudent);
 
         Assertions.assertAll(() -> {
-            Assertions.assertEquals(123, lorienStudent.getLorienId());
-            Assertions.assertEquals("Harry", lorienStudent.getFirstName());
+            Assertions.assertEquals(0, lorienStudent.getLorienId());
+            Assertions.assertEquals("Legolas", lorienStudent.getFirstName());
             Assertions.assertEquals("Potter", lorienStudent.getLastName());
         });
     }
@@ -54,5 +54,10 @@ public final class HogwartsLorienSynchronizerTests {
             Assertions.assertNotNull(lorienStudent.getTree());
             Assertions.assertEquals("Slytherin", lorienStudent.getTree().getName());
         });
+    }
+
+    @Test
+    public void given_nonNullProperty_when_overWritePolicyIsSetToIfNull_then_propertyIsNotUpdated() {
+
     }
 }
