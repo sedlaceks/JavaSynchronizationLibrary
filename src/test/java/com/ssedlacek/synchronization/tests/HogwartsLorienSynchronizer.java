@@ -12,12 +12,6 @@ public class HogwartsLorienSynchronizer extends SynchronizationBase<HogwartsStud
     }
 
 
-    @Override
-    public void synchronize() throws InvocationTargetException, IllegalAccessException, GetterNotFoundException, SetterNotFoundException {
-
-    }
-
-
     public void fakeSynchronize(HogwartsStudent hogwartsStudent, LorienStudent lorienStudent) throws GetterNotFoundException, SetterNotFoundException, InvocationTargetException, IllegalAccessException {
         updateByPrimary(hogwartsStudent, lorienStudent);
     }
@@ -29,7 +23,7 @@ public class HogwartsLorienSynchronizer extends SynchronizationBase<HogwartsStud
             return super.transformToSecondary(value, primaryFieldName, second, first);
         }
         if (value.getClass() == HogwartsHouse.class) {
-            return new LorienTree(((HogwartsHouse)value).name());
+            return new LorienTree(((HogwartsHouse)value).getName());
         }
 
         return super.transformToSecondary(value, primaryFieldName, second, first);

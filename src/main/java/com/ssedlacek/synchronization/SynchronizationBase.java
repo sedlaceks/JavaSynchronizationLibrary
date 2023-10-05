@@ -44,9 +44,6 @@ public abstract class SynchronizationBase<TPrimary, TSecondary, TMapping extends
     }
 
 
-    public abstract void synchronize() throws InvocationTargetException, IllegalAccessException, GetterNotFoundException, SetterNotFoundException;
-
-
     public SynchronizationBase(Class<TPrimary> primaryClass, Class<TSecondary> secondaryClass, Class<TMapping> mapping)
             throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         this.primaryClass = primaryClass;
@@ -59,11 +56,11 @@ public abstract class SynchronizationBase<TPrimary, TSecondary, TMapping extends
         var isChanged = false;
 
         for (var item : mapping.getMappingItems()) {
-            if ((item.syncDirection() != SyncDirection.ToSecondarySystem) && (item.syncDirection() != SyncDirection.Bidirectional)) {
+            if ((item.getSyncDirection() != SyncDirection.ToSecondarySystem) && (item.getSyncDirection() != SyncDirection.Bidirectional)) {
                 continue;
             }
 
-            isChanged |= updateFirstBySecond(primary, secondary, item, (d) -> transformToSecondary(d, item.primarySystemNameField(), secondary, primary));
+            isChanged |= updateFirstBySecond(primary, secondary, item, (d) -> transformToSecondary(d, item.getPrimarySystemNameField(), secondary, primary));
         }
 
         return isChanged;
@@ -74,11 +71,11 @@ public abstract class SynchronizationBase<TPrimary, TSecondary, TMapping extends
         var isChanged = false;
 
         for (var item : mapping.getMappingItems()) {
-            if ((item.syncDirection() != SyncDirection.ToPrimarySystem) && (item.syncDirection() != SyncDirection.Bidirectional)) {
+            if ((item.getSyncDirection() != SyncDirection.ToPrimarySystem) && (item.getSyncDirection() != SyncDirection.Bidirectional)) {
                 continue;
             }
 
-            isChanged |= updateFirstBySecond(second, first, item, (d) -> transformToPrimary(d, item.secondarySystemNameField(), first, second));
+            isChanged |= updateFirstBySecond(second, first, item, (d) -> transformToPrimary(d, item.getSecondarySystemNameField(), first, second));
         }
 
         return isChanged;
@@ -89,48 +86,48 @@ public abstract class SynchronizationBase<TPrimary, TSecondary, TMapping extends
         var hasChanged = false;
 
         var primarySystemFieldGetter = Arrays.stream(getPrimaryClassMethods()).filter(m ->
-                        m.getName().equals("get" + StringUtils.capitalize(item.primarySystemNameField())))
+                        m.getName().equals("get" + StringUtils.capitalize(item.getPrimarySystemNameField())))
                 .findFirst()
-                .orElseThrow(() -> new GetterNotFoundException("No getter found in primary object for property with name " + item.primarySystemNameField()));
+                .orElseThrow(() -> new GetterNotFoundException("No getter found in primary object for property with name " + item.getPrimarySystemNameField()));
 
         var primarySystemFieldGetterValue = primarySystemFieldGetter.invoke(first);
 
         // Obtain current value first.
         var secondarySystemFieldGetter = Arrays.stream(getSecondaryClassMethods()).filter(d ->
-                        d.getName().equals("get" + StringUtils.capitalize(item.secondarySystemNameField())))
+                        d.getName().equals("get" + StringUtils.capitalize(item.getSecondarySystemNameField())))
                 .findFirst()
-                .orElseThrow(() -> new GetterNotFoundException("No getter found in class for property with name " + item.secondarySystemNameField()));
+                .orElseThrow(() -> new GetterNotFoundException("No getter found in class for property with name " + item.getSecondarySystemNameField()));
 
         // Prepare setter.
         var secondarySystemFieldSetter = Arrays.stream(getSecondaryClassMethods()).filter(c ->
-                        c.getName().equals("set" + StringUtils.capitalize(item.secondarySystemNameField())))
+                        c.getName().equals("set" + StringUtils.capitalize(item.getSecondarySystemNameField())))
                 .findFirst()
-                .orElseThrow(() -> new SetterNotFoundException("No setter found in secondary object for property with name " + item.secondarySystemNameField()));
+                .orElseThrow(() -> new SetterNotFoundException("No setter found in secondary object for property with name " + item.getSecondarySystemNameField()));
 
         var secValue = secondarySystemFieldGetter.invoke(second);
 
         var transformed = transformMethod.apply(primarySystemFieldGetterValue);
 
-        switch (item.overwritePolicy()) {
-            case Always -> {
+        switch (item.getOverwritePolicy()) {
+            case Always:
                 secondarySystemFieldSetter.invoke(second, transformed);
 
                 hasChanged = true;
-            }
-            case IfNull -> {
+
+                break;
+        case IfNull:
                 if (secValue == null) {
                     secondarySystemFieldSetter.invoke(second, transformed);
 
                     hasChanged = true;
                 }
-            }
-            case IfNotNull -> {
+                break;
+            case IfNotNull:
                 if (secValue != null) {
                     secondarySystemFieldSetter.invoke(second, transformed);
 
                     hasChanged = true;
                 }
-            }
         }
 
         secondarySystemFieldSetter.invoke(second, transformed);

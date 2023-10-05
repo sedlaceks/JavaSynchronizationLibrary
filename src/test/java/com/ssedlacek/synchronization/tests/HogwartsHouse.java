@@ -2,5 +2,11 @@ package com.ssedlacek.synchronization.tests;
 
 import lombok.Getter;
 
-public record HogwartsHouse(String name) {
+@Getter
+public class HogwartsHouse {
+    private final String name;
+
+    public HogwartsHouse(String name) {
+        this.name = name;
+    }
 }

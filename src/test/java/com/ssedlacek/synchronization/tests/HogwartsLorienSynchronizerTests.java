@@ -52,7 +52,7 @@ public final class HogwartsLorienSynchronizerTests {
 
         Assertions.assertAll(() -> {
             Assertions.assertNotNull(lorienStudent.getTree());
-            Assertions.assertEquals("Slytherin", lorienStudent.getTree().treeName());
+            Assertions.assertEquals("Slytherin", lorienStudent.getTree().getName());
         });
     }
 }
