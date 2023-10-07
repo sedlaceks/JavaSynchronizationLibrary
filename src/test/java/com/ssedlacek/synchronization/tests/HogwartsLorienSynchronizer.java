@@ -2,11 +2,11 @@ package com.ssedlacek.synchronization.tests;
 
 import com.ssedlacek.synchronization.GetterNotFoundException;
 import com.ssedlacek.synchronization.SetterNotFoundException;
-import com.ssedlacek.synchronization.SynchronizationBase;
+import com.ssedlacek.synchronization.PropertySynchronizer;
 
 import java.lang.reflect.InvocationTargetException;
 
-public class HogwartsLorienSynchronizer extends SynchronizationBase<HogwartsStudent, LorienStudent, HogwartsLorienStudentMapping> {
+public class HogwartsLorienSynchronizer extends PropertySynchronizer<HogwartsStudent, LorienStudent, HogwartsLorienStudentMapping> {
     public HogwartsLorienSynchronizer() throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         super(HogwartsStudent.class, LorienStudent.class, HogwartsLorienStudentMapping.class);
     }
